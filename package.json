@@ -1,22 +1,20 @@
+
 {
-  "name": "war-card-game---milchama",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
+  "name": "war-card-game-milchama",
+  "version": "1.0.0",
+  "description": "Professional War card game - Milchama",
+  "main": "index.tsx",
   "dependencies": {
+    "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "@google/genai": "^1.41.0",
-    "react": "^19.2.4"
+    "lucide-react": "^0.454.0"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8.4.35",
+    "autoprefixer": "^10.4.18"
+  },
+  "scripts": {
+    "build": "tailwind build index.css -o dist/output.css"
   }
 }
