@@ -45,11 +45,10 @@ const App: React.FC = () => {
   const [lastWinnerId, setLastWinnerId] = useState<number | null>(null);
   const t = THEME_CONFIG[theme];
 
-  // Keyboard Support (WASD / Space / Enter)
+  // Keyboard Support (WASD / Mobile-friendly triggers)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
-      // WASD or Common keys for playing
       if ([' ', 'enter', 'w', 'a', 's', 'd'].includes(key)) {
         if (gameState.status === GameStatus.PLAYING || gameState.status === GameStatus.WAR) {
           handlePlayClick();
@@ -242,13 +241,13 @@ const App: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-2xl backdrop-blur-xl border border-slate-700/50 scale-90 md:scale-100">
-          <button onClick={toggleMute} className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all ${gameState.isMuted ? 'bg-red-500/20 text-red-500' : 'hover:bg-white/10'}`}>
+          <button onClick={toggleMute} title="השתק קול" className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all ${gameState.isMuted ? 'bg-red-500/20 text-red-500' : 'hover:bg-white/10'}`}>
             {gameState.isMuted ? '🔇' : '🔊'}
           </button>
           <div className="w-px h-6 bg-slate-700/50 mx-1"></div>
-          <button onClick={() => setTheme(Theme.LIGHT)} className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all ${theme === Theme.LIGHT ? 'bg-white text-black shadow-lg' : 'hover:bg-white/10'}`}>☀️</button>
-          <button onClick={() => setTheme(Theme.DARK)} className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all ${theme === Theme.DARK ? 'bg-slate-700 text-white shadow-lg' : 'hover:bg-white/10'}`}>🌙</button>
-          <button onClick={() => setTheme(Theme.COLORFUL_DARK)} className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all ${theme === Theme.COLORFUL_DARK ? 'bg-fuchsia-600 text-white shadow-lg' : 'hover:bg-white/10'}`}>🌈</button>
+          <button onClick={() => setTheme(Theme.LIGHT)} title="מצב בהיר" className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all ${theme === Theme.LIGHT ? 'bg-white text-black shadow-lg' : 'hover:bg-white/10'}`}>☀️</button>
+          <button onClick={() => setTheme(Theme.DARK)} title="מצב כהה" className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all ${theme === Theme.DARK ? 'bg-slate-700 text-white shadow-lg' : 'hover:bg-white/10'}`}>🌙</button>
+          <button onClick={() => setTheme(Theme.COLORFUL_DARK)} title="מצב צבעוני" className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all ${theme === Theme.COLORFUL_DARK ? 'bg-fuchsia-600 text-white shadow-lg' : 'hover:bg-white/10'}`}>🌈</button>
         </div>
       </header>
 
@@ -260,23 +259,23 @@ const App: React.FC = () => {
           <div className={`${t.card} rounded-3xl p-5 md:p-6 shadow-2xl border border-white/5 flex flex-col gap-4 bg-opacity-40 backdrop-blur-md`}>
             <h2 className="text-xl font-bold border-b border-white/10 pb-2 text-right">תפריט</h2>
             <button onClick={() => initializeGame(GameMode.VS_COMPUTER)} className={`w-full py-4 rounded-xl font-bold transition-all ${t.accent} ${t.accentHover} text-white shadow-xl transform active:scale-95 text-lg`}>נגד המחשב 🤖</button>
-            <button onClick={() => initializeGame(GameMode.TWO_PLAYERS)} className={`w-full py-4 rounded-xl font-bold transition-all ${t.secondary} hover:bg-opacity-80 transform active:scale-95 text-lg`}>שחקן נגד שחקן 👥</button>
+            <button onClick={() => initializeGame(GameMode.TWO_PLAYERS)} className={`w-full py-4 rounded-xl font-bold transition-all ${t.secondary} hover:bg-opacity-80 transform active:scale-95 text-lg`}>שני שחקנים 👥</button>
 
             {isGameActive && (
               <div className="flex flex-col gap-2 mt-4">
                 <button onClick={togglePause} className={`w-full py-3 rounded-xl font-bold border transition-all transform active:scale-95 ${gameState.isPaused ? 'bg-emerald-500 text-white border-emerald-400' : 'bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500 hover:text-white'}`}>
                   {gameState.isPaused ? 'המשך ▶️' : 'השהה ⏸️'}
                 </button>
-                <button onClick={resetToMenu} className="w-full py-3 rounded-xl font-bold bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all transform active:scale-95">אפס משחק 🔄</button>
+                <button onClick={resetToMenu} className="w-full py-3 rounded-xl font-bold bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all transform active:scale-95">חזור לתפריט 🔄</button>
               </div>
             )}
           </div>
 
           <div className={`${t.card} rounded-3xl p-5 md:p-6 shadow-xl border border-white/5 flex flex-col gap-3 flex-1 overflow-hidden bg-opacity-30`}>
-            <h2 className="text-lg font-bold border-b border-white/10 pb-2 text-right">מהלכים אחרונים</h2>
+            <h2 className="text-lg font-bold border-b border-white/10 pb-2 text-right text-slate-300">היסטוריית קרבות</h2>
             <div className="flex-1 overflow-y-auto space-y-2 pr-2 dir-rtl custom-scrollbar">
               {gameState.history.length === 0 ? (
-                <p className="text-xs opacity-30 text-center mt-4 italic">טרם בוצעו מהלכים</p>
+                <p className="text-xs opacity-30 text-center mt-4 italic">המשחק טרם החל</p>
               ) : (
                 gameState.history.map((round, idx) => (
                   <div key={idx} className="bg-white/5 rounded-xl p-3 flex items-center justify-between text-xs border border-white/5 transition-all hover:bg-white/10">
@@ -284,13 +283,13 @@ const App: React.FC = () => {
                        <span className={`font-bold text-lg ${round.p1Card.suit === 'Hearts' || round.p1Card.suit === 'Diamonds' ? 'text-red-400' : 'text-slate-300'}`}>
                          {round.p1Card.rank}{SUIT_SYMBOLS[round.p1Card.suit]}
                        </span>
-                       <span className="opacity-20">vs</span>
+                       <span className="opacity-20 text-[10px]">נגד</span>
                        <span className={`font-bold text-lg ${round.p2Card.suit === 'Hearts' || round.p2Card.suit === 'Diamonds' ? 'text-red-400' : 'text-slate-300'}`}>
                          {round.p2Card.rank}{SUIT_SYMBOLS[round.p2Card.suit]}
                        </span>
                     </div>
                     <div className={`px-2 py-0.5 rounded-full ${round.isWar ? 'bg-red-500 text-white font-black scale-90' : 'bg-slate-700/50 opacity-50'}`}>
-                      {round.isWar ? 'מלחמה!' : 'OK'}
+                      {round.isWar ? 'מלחמה!' : 'בוצע'}
                     </div>
                   </div>
                 ))
@@ -299,10 +298,10 @@ const App: React.FC = () => {
           </div>
         </aside>
 
-        {/* Board */}
+        {/* Board Area */}
         <section className={`lg:col-span-3 ${t.board} rounded-[3rem] p-4 md:p-10 shadow-2xl border-4 border-slate-800/50 relative flex flex-col gap-8 items-center justify-center min-h-[500px] md:min-h-[650px] overflow-hidden bg-gradient-to-b from-transparent to-black/20`}>
           
-          {/* Deck Counters */}
+          {/* Deck Counters & Status */}
           <div className="w-full flex justify-between items-center px-4 md:px-12 absolute top-10 left-0 right-0 z-10">
              <DeckStack count={gameState.player2Deck.length} theme={theme} label={gameState.mode === GameMode.VS_COMPUTER ? 'מחשב' : 'שחקן 2'} winnerHighlight={lastWinnerId === 2} />
              
@@ -311,16 +310,15 @@ const App: React.FC = () => {
                   {gameState.isPaused ? 'המשחק מושהה ⏸️' : gameState.lastResult}
                 </p>
                 {gameState.status === GameStatus.WAR && !gameState.isPaused && (
-                  <div className="inline-block px-4 py-1 mt-2 rounded-full bg-red-600 text-white text-[10px] md:text-xs font-black animate-pulse uppercase tracking-widest">מלחמה!</div>
+                  <div className="inline-block px-4 py-1 mt-2 rounded-full bg-red-600 text-white text-[10px] md:text-xs font-black animate-pulse uppercase tracking-widest shadow-lg shadow-red-500/40">מלחמה!</div>
                 )}
              </div>
 
              <DeckStack count={gameState.player1Deck.length} theme={theme} label="שחקן 1" isPlayer1 winnerHighlight={lastWinnerId === 1} />
           </div>
 
-          {/* Cards Table */}
+          {/* Table Surface */}
           <div className={`flex-1 flex items-center justify-center gap-6 md:gap-16 w-full mt-28 transition-all duration-700 ${gameState.isPaused ? 'opacity-20 scale-95 blur-sm' : 'opacity-100 scale-100'}`}>
-            {/* P2 Side */}
             <div className="flex flex-col items-center">
               <div className="h-44 md:h-52 flex items-center justify-center">
                 {gameState.player2InPlay.length > 0 ? (
@@ -343,7 +341,6 @@ const App: React.FC = () => {
 
             <div className="h-40 w-px bg-slate-800/50 hidden md:block" />
 
-            {/* P1 Side */}
             <div className="flex flex-col items-center">
               <div className="h-44 md:h-52 flex items-center justify-center">
                 {gameState.player1InPlay.length > 0 ? (
@@ -365,15 +362,15 @@ const App: React.FC = () => {
             </div>
           </div>
           
-          {/* Action Button */}
+          {/* Master Control Button */}
           <div className="w-full flex justify-center pb-10 z-20">
             {isGameActive && (
                <button 
                 onClick={handlePlayClick} 
                 disabled={isProcessing || gameState.isPaused} 
-                className={`px-12 md:px-32 py-5 md:py-8 rounded-[2.5rem] text-2xl md:text-4xl font-black bg-emerald-500 hover:bg-emerald-400 text-white shadow-[0_0_50px_rgba(16,185,129,0.3)] disabled:opacity-30 active:scale-95 transition-all w-full md:w-auto mx-4 uppercase tracking-tighter border-b-8 border-emerald-700 active:border-b-0 active:translate-y-2`}
+                className={`px-12 md:px-32 py-5 md:py-8 rounded-[2.5rem] text-2xl md:text-4xl font-black bg-emerald-500 hover:bg-emerald-400 text-white shadow-[0_0_50px_rgba(16,185,129,0.3)] disabled:opacity-30 active:scale-95 transition-all w-full md:w-auto mx-4 uppercase tracking-tighter border-b-8 border-emerald-700 active:border-b-0 active:translate-y-2 select-none`}
                >
-                  {gameState.isPaused ? 'המשחק מושהה' : gameState.status === GameStatus.WAR ? 'מלחמה! 🔥' : 'הפוך קלף! 🃏'}
+                  {gameState.isPaused ? 'המשחק מושהה' : gameState.status === GameStatus.WAR ? 'המשך מלחמה! 🔥' : 'הפוך קלף! 🃏'}
                 </button>
             )}
             
@@ -382,30 +379,30 @@ const App: React.FC = () => {
             )}
           </div>
 
-          {/* Start Screen Overlay */}
+          {/* IDLE State Overlay */}
           {gameState.status === GameStatus.IDLE && (
             <div className="absolute inset-0 z-30 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center p-8 text-center rounded-[3rem]">
               <div className="max-w-md animate-in fade-in zoom-in duration-500">
-                <div className="text-9xl mb-8 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">🃏</div>
+                <div className="text-9xl mb-8 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] select-none">🃏</div>
                 <h3 className="text-6xl font-black mb-4 font-serif text-white tracking-tight">מלחמה</h3>
-                <p className="mb-12 text-slate-400 text-xl leading-relaxed">הגרסה המקצועית והמהירה ביותר למשחק הקלפים הקלאסי. קחו את כל הקלפים כדי לנצח!</p>
+                <p className="mb-12 text-slate-400 text-xl leading-relaxed">הגרסה המקצועית ביותר למשחק הקלפים הקלאסי. קחו את כל הקלפים כדי לנצח!</p>
                 <div className="flex flex-col gap-4">
                   <button onClick={() => initializeGame(GameMode.VS_COMPUTER)} className="w-full py-5 rounded-2xl bg-white text-slate-950 font-black text-2xl hover:bg-emerald-400 shadow-[0_10px_40px_rgba(255,255,255,0.1)] transition-all transform hover:-translate-y-1">נגד המחשב 🤖</button>
                   <button onClick={() => initializeGame(GameMode.TWO_PLAYERS)} className="w-full py-5 rounded-2xl border-2 border-slate-700 hover:border-emerald-500 text-slate-200 font-black text-2xl transition-all transform hover:-translate-y-1">שני שחקנים 👥</button>
                 </div>
-                <p className="mt-10 text-xs opacity-40 font-bold uppercase tracking-widest">WASD / SPACE / ENTER - קיצורי דרך</p>
+                <p className="mt-10 text-xs opacity-40 font-bold uppercase tracking-widest">WASD / SPACE / ENTER - קיצורי מקלדת</p>
               </div>
             </div>
           )}
         </section>
       </main>
 
-      {/* Footer */}
+      {/* Production Footer */}
       <footer className="mt-8 max-w-6xl mx-auto w-full text-center border-t border-slate-800/50 pt-8 pb-4 opacity-40 text-[10px] md:text-xs">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <p dir="ltr" className="font-mono tracking-tighter">(C) Noam Gold AI 2026</p>
           <div className="flex gap-6 items-center">
-            <a href="mailto:goldnoamai@gmail.com" className="hover:text-white transition-colors underline decoration-slate-600">Send Feedback</a>
+            <a href="mailto:goldnoamai@gmail.com" className="hover:text-white transition-colors underline decoration-slate-600">שלח משוב</a>
             <span className="font-mono">goldnoamai@gmail.com</span>
           </div>
         </div>
