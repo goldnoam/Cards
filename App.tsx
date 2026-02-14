@@ -328,6 +328,7 @@ const App: React.FC = () => {
                       <CardComponent 
                         card={gameState.player2InPlay.slice(-1)[0]} 
                         themeColors={t} 
+                        side="left"
                         animationState={lastWinnerId === 2 ? 'winning' : gameState.status === GameStatus.WAR ? 'war' : 'playing'} 
                       />
                       {gameState.player2InPlay.length > 1 && (
@@ -350,6 +351,7 @@ const App: React.FC = () => {
                     <CardComponent 
                       card={gameState.player1InPlay.slice(-1)[0]} 
                       themeColors={t} 
+                      side="right"
                       animationState={lastWinnerId === 1 ? 'winning' : gameState.status === GameStatus.WAR ? 'war' : 'playing'} 
                     />
                     {gameState.player1InPlay.length > 1 && (

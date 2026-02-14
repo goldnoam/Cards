@@ -8,6 +8,7 @@ interface CardComponentProps {
   className?: string;
   themeColors: any;
   animationState?: 'playing' | 'winning' | 'war' | 'idle';
+  side?: 'left' | 'right';
   style?: React.CSSProperties;
 }
 
@@ -17,16 +18,21 @@ const CardComponent: React.FC<CardComponentProps> = ({
   className = "", 
   themeColors,
   animationState = 'idle',
+  side = 'left',
   style
 }) => {
   const isRed = card?.suit === 'Hearts' || card?.suit === 'Diamonds';
 
   const getAnimationClass = () => {
     switch (animationState) {
-      case 'playing': return 'animate-card-flip';
-      case 'war': return 'animate-war-reveal';
-      case 'winning': return 'animate-win-zoom';
-      default: return '';
+      case 'playing': 
+        return side === 'left' ? 'animate-deal-left' : 'animate-deal-right';
+      case 'war': 
+        return 'animate-war-reveal';
+      case 'winning': 
+        return 'animate-win-zoom';
+      default: 
+        return '';
     }
   };
 
@@ -72,15 +78,6 @@ const CardComponent: React.FC<CardComponentProps> = ({
       </div>
       
       <style>{`
-        @keyframes flip-in {
-          0% { transform: rotateY(90deg) scale(0.7) translateY(20px); opacity: 0; }
-          60% { transform: rotateY(-10deg) scale(1.05); }
-          100% { transform: rotateY(0deg) scale(1) translateY(0); opacity: 1; }
-        }
-        .animate-card-flip {
-          animation: flip-in 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-        }
-        
         @keyframes war-reveal {
           0% { transform: rotateY(90deg) scale(0.6) rotateZ(-5deg); opacity: 0; filter: blur(4px); }
           70% { transform: rotateY(90deg) scale(0.6) rotateZ(5deg); opacity: 0; filter: blur(4px); }
