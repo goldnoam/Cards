@@ -30,7 +30,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     
-    <!-- Tailwind CDN with optimized configuration -->
+    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -58,7 +58,7 @@
     "react": "https://esm.sh/react@19.0.0",
     "react-dom": "https://esm.sh/react-dom@19.0.0",
     "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-    "lucide-react": "https://esm.sh/lucide-react@latest",
+    "lucide-react": "https://esm.sh/lucide-react@0.454.0",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
     "react/": "https://esm.sh/react@^19.2.4/"
   }
@@ -66,16 +66,42 @@
 </script>
 </head>
 <body class="transition-colors duration-500 overflow-x-hidden text-slate-100 bg-[#020617] select-none">
-    <div id="root"></div>
+    <div id="root">
+        <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #020617;">
+            <div style="text-align: center;">
+                <div style="font-size: 5rem; margin-bottom: 1rem;">🃏</div>
+                <div style="font-family: 'Assistant', sans-serif; color: #475569;">טוען משחק...</div>
+            </div>
+        </div>
+    </div>
     <script type="module" src="./index.tsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js').catch(err => {
+          navigator.serviceWorker.register('./sw.js').then(reg => {
+            console.log('SW registered');
+            reg.onupdatefound = () => {
+              const installingWorker = reg.installing;
+              installingWorker.onstatechange = () => {
+                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  window.location.reload();
+                }
+              };
+            };
+          }).catch(err => {
             console.log('SW registration failed: ', err);
           });
         });
       }
+      
+      window.onerror = function(msg, url, lineNo, columnNo, error) {
+        console.error('Window Error:', msg, url, lineNo, columnNo, error);
+        const root = document.getElementById('root');
+        if (root && root.innerHTML.includes('טוען')) {
+           root.innerHTML = '<div style="color: white; padding: 50px; text-align: center; font-family: Assistant, sans-serif;"><h2>שגיאה בטעינה</h2><p>' + msg + '</p><button onclick="window.location.reload()" style="padding: 10px 20px; background: white; color: black; border: none; border-radius: 8px; margin-top: 20px; cursor: pointer;">נסה שוב</button></div>';
+        }
+        return false;
+      };
     </script>
 </body>
 </html>
