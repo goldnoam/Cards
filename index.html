@@ -2,24 +2,27 @@
 <html lang="he" dir="rtl" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>מלחמה - משחק קלפים מקצועי | War Card Game Online</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="שחקו במשחק הקלפים הקלאסי מלחמה (Milchama) בחינם. גרסה מקצועית, מהירה ומעוצבת, מותאמת למובייל ולמחשב. ללא צורך בהורדה.">
-    <meta name="keywords" content="מלחמה, משחק קלפים, קלפים אונליין, משחקים בחינם, War Card Game, Milchama, קלפים">
+    <meta name="description" content="שחקו במשחק הקלפים הקלאסי מלחמה (Milchama) בחינם. גרסה מקצועית, מהירה ומעוצבת, מותאמת למובייל ולמחשב. עובד גם באופליין!">
+    <meta name="keywords" content="מלחמה, משחק קלפים, קלפים אונליין, משחקים בחינם, War Card Game, Milchama, קלפים, משחק ללא אינטרנט">
     <meta name="author" content="Noam Gold AI">
-    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#020617">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cards12.vercel.app/">
     <meta property="og:title" content="מלחמה - משחק קלפים מקצועי">
-    <meta property="og:description" content="משחק הקלפים הקלאסי בגרסה מלוטשת ומהירה.">
-    <meta property="og:image" content="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🃏</text></svg>">
+    <meta property="og:description" content="משחק הקלפים הקלאסי בגרסה מלוטשת ומהירה. שחקו עכשיו בחינם!">
+    <meta property="og:image" content="https://cards12.vercel.app/og-image.png">
 
-    <!-- Favicon -->
+    <!-- Favicon & Manifest -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🃏</text></svg>">
+    <link rel="manifest" href="./manifest.json">
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="./index.css">
@@ -30,7 +33,7 @@
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0274741291001288" crossorigin="anonymous"></script>
 
-    <!-- Tailwind CDN for Guaranteed Production Rendering -->
+    <!-- Tailwind CDN with optimized configuration -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -65,8 +68,17 @@
 }
 </script>
 </head>
-<body class="transition-colors duration-500 overflow-x-hidden text-slate-100 bg-[#020617]">
+<body class="transition-colors duration-500 overflow-x-hidden text-slate-100 bg-[#020617] select-none">
     <div id="root"></div>
     <script type="module" src="./index.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(err => {
+            console.log('SW registration failed: ', err);
+          });
+        });
+      }
+    </script>
 </body>
 </html>

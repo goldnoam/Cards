@@ -45,25 +45,6 @@ const App: React.FC = () => {
   const [lastWinnerId, setLastWinnerId] = useState<number | null>(null);
   const t = THEME_CONFIG[theme];
 
-  // Keyboard Support (WASD / Mobile-friendly triggers)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const key = e.key.toLowerCase();
-      if ([' ', 'enter', 'w', 'a', 's', 'd'].includes(key)) {
-        if (gameState.status === GameStatus.PLAYING || gameState.status === GameStatus.WAR) {
-          handlePlayClick();
-        } else if (gameState.status === GameStatus.IDLE) {
-          initializeGame(GameMode.VS_COMPUTER);
-        }
-      }
-      if (key === 'p') togglePause();
-      if (key === 'r') resetToMenu();
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState.status, gameState.isPaused, isProcessing, lastWinnerId]);
-
   const initializeGame = (mode: GameMode) => {
     if (!gameState.isMuted) sounds.playCard();
     const deck = createDeck();
@@ -82,27 +63,6 @@ const App: React.FC = () => {
       isPaused: false
     }));
     setLastWinnerId(null);
-  };
-
-  const resetToMenu = () => {
-    setGameState(prev => ({
-      ...prev,
-      status: GameStatus.IDLE,
-      player1Deck: [],
-      player2Deck: [],
-      player1InPlay: [],
-      player2InPlay: [],
-      isPaused: false
-    }));
-    setLastWinnerId(null);
-  };
-
-  const togglePause = () => {
-    setGameState(prev => ({ ...prev, isPaused: !prev.isPaused }));
-  };
-
-  const toggleMute = () => {
-    setGameState(prev => ({ ...prev, isMuted: !prev.isMuted }));
   };
 
   const playRound = useCallback(async () => {
@@ -137,7 +97,7 @@ const App: React.FC = () => {
     const isCurrentWar = gameState.status === GameStatus.WAR;
 
     if (p1Card.value > p2Card.value) {
-      resultMsg = 'שחקן 1 מנצח בסיבוב!';
+      resultMsg = 'שחקן 1 מנצח!';
       winnerId = 1;
       finalP1Deck = [...newP1Deck, ...shuffle([...newP1InPlay, ...newP2InPlay])];
       if (!gameState.isMuted) setTimeout(sounds.winRound, isCurrentWar ? 1200 : 300);
@@ -198,6 +158,27 @@ const App: React.FC = () => {
     }
   };
 
+  const resetToMenu = () => {
+    setGameState(prev => ({
+      ...prev,
+      status: GameStatus.IDLE,
+      player1Deck: [],
+      player2Deck: [],
+      player1InPlay: [],
+      player2InPlay: [],
+      isPaused: false
+    }));
+    setLastWinnerId(null);
+  };
+
+  const togglePause = () => {
+    setGameState(prev => ({ ...prev, isPaused: !prev.isPaused }));
+  };
+
+  const toggleMute = () => {
+    setGameState(prev => ({ ...prev, isMuted: !prev.isMuted }));
+  };
+
   const checkWinner = useCallback(() => {
     if (gameState.player1Deck.length === 0 && gameState.player1InPlay.length === 0) {
       if (!gameState.isMuted) sounds.gameOver();
@@ -219,201 +200,161 @@ const App: React.FC = () => {
   }, [gameState.player1Deck.length, gameState.player2Deck.length, gameState.player1InPlay.length, gameState.player2InPlay.length, gameState.isMuted]);
 
   useEffect(() => {
-    if (gameState.status === GameStatus.PLAYING || gameState.status === GameStatus.WAR) {
-      if ((gameState.player1Deck.length === 0 && gameState.player1InPlay.length === 0) || 
-          (gameState.player2Deck.length === 0 && gameState.player2InPlay.length === 0)) {
-        checkWinner();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      if ([' ', 'enter', 'w', 'a', 's', 'd'].includes(key)) {
+        if (gameState.status === GameStatus.PLAYING || gameState.status === GameStatus.WAR) {
+          handlePlayClick();
+        } else if (gameState.status === GameStatus.IDLE) {
+          initializeGame(GameMode.VS_COMPUTER);
+        }
       }
-    }
-  }, [gameState.player1Deck.length, gameState.player2Deck.length, gameState.status, checkWinner, gameState.player1InPlay.length, gameState.player2InPlay.length]);
+      if (key === 'p') togglePause();
+      if (key === 'r') resetToMenu();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameState.status, gameState.isPaused, isProcessing, lastWinnerId]);
 
   const isGameActive = gameState.status === GameStatus.PLAYING || gameState.status === GameStatus.WAR;
 
   return (
-    <div className={`min-h-screen transition-all duration-500 flex flex-col ${t.bg} ${t.text} p-3 md:p-8 overflow-hidden`}>
+    <div className={`min-h-screen transition-all duration-500 flex flex-col ${t.bg} ${t.text} p-2 md:p-8 overflow-hidden`}>
       {/* Header */}
-      <header className={`max-w-6xl mx-auto w-full flex flex-row items-center justify-between mb-4 md:mb-8 gap-4 transition-all duration-500 ${isGameActive ? 'opacity-40' : ''}`}>
-        <div className="text-right md:text-left">
-          <h1 className="text-3xl md:text-5xl font-extrabold font-serif tracking-tight mb-1 text-slate-100">
-            מלחמה <span className="hidden md:inline text-sm font-normal align-top opacity-50">MILCHAMA</span>
+      <header className="max-w-6xl mx-auto w-full flex items-center justify-between mb-2 md:mb-8 gap-2">
+        <div className="text-right">
+          <h1 className="text-2xl md:text-5xl font-black font-serif text-white flex items-center gap-2">
+            מלחמה <span className="text-[10px] md:text-sm font-normal opacity-40">PRO</span>
           </h1>
-          {!isGameActive && <p className="opacity-60 text-xs md:text-sm">משחק הקלפים המקצועי</p>}
         </div>
 
-        <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-2xl backdrop-blur-xl border border-slate-700/50 scale-90 md:scale-100">
-          <button onClick={toggleMute} title="השתק קול" className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all ${gameState.isMuted ? 'bg-red-500/20 text-red-500' : 'hover:bg-white/10'}`}>
+        <div className="flex items-center gap-1 md:gap-2 bg-slate-800/40 p-1 md:p-1.5 rounded-xl md:rounded-2xl backdrop-blur-xl border border-slate-700/50">
+          <button onClick={toggleMute} title="השתק" className={`w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center transition-all ${gameState.isMuted ? 'bg-red-500/20 text-red-500' : 'hover:bg-white/10'}`}>
             {gameState.isMuted ? '🔇' : '🔊'}
           </button>
-          <div className="w-px h-6 bg-slate-700/50 mx-1"></div>
-          <button onClick={() => setTheme(Theme.LIGHT)} title="מצב בהיר" className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all ${theme === Theme.LIGHT ? 'bg-white text-black shadow-lg' : 'hover:bg-white/10'}`}>☀️</button>
-          <button onClick={() => setTheme(Theme.DARK)} title="מצב כהה" className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all ${theme === Theme.DARK ? 'bg-slate-700 text-white shadow-lg' : 'hover:bg-white/10'}`}>🌙</button>
-          <button onClick={() => setTheme(Theme.COLORFUL_DARK)} title="מצב צבעוני" className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all ${theme === Theme.COLORFUL_DARK ? 'bg-fuchsia-600 text-white shadow-lg' : 'hover:bg-white/10'}`}>🌈</button>
+          <div className="w-px h-5 bg-slate-700/50"></div>
+          <button onClick={() => setTheme(Theme.LIGHT)} className={`w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center ${theme === Theme.LIGHT ? 'bg-white text-black' : 'hover:bg-white/10'}`}>☀️</button>
+          <button onClick={() => setTheme(Theme.DARK)} className={`w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center ${theme === Theme.DARK ? 'bg-slate-700 text-white' : 'hover:bg-white/10'}`}>🌙</button>
+          <button onClick={() => setTheme(Theme.COLORFUL_DARK)} className={`w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center ${theme === Theme.COLORFUL_DARK ? 'bg-fuchsia-600 text-white' : 'hover:bg-white/10'}`}>🌈</button>
         </div>
       </header>
 
-      {/* Main Game Area */}
-      <main className="flex-1 max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-8 overflow-hidden">
+      {/* Main Container */}
+      <main className="flex-1 max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-4 gap-4 overflow-hidden relative">
         
-        {/* Actions Sidebar */}
-        <aside className={`lg:col-span-1 flex flex-col gap-4 md:gap-6 ${isGameActive ? 'hidden lg:flex' : 'flex'}`}>
-          <div className={`${t.card} rounded-3xl p-5 md:p-6 shadow-2xl border border-white/5 flex flex-col gap-4 bg-opacity-40 backdrop-blur-md`}>
-            <h2 className="text-xl font-bold border-b border-white/10 pb-2 text-right">תפריט</h2>
-            <button onClick={() => initializeGame(GameMode.VS_COMPUTER)} className={`w-full py-4 rounded-xl font-bold transition-all ${t.accent} ${t.accentHover} text-white shadow-xl transform active:scale-95 text-lg`}>נגד המחשב 🤖</button>
-            <button onClick={() => initializeGame(GameMode.TWO_PLAYERS)} className={`w-full py-4 rounded-xl font-bold transition-all ${t.secondary} hover:bg-opacity-80 transform active:scale-95 text-lg`}>שני שחקנים 👥</button>
-
-            {isGameActive && (
-              <div className="flex flex-col gap-2 mt-4">
-                <button onClick={togglePause} className={`w-full py-3 rounded-xl font-bold border transition-all transform active:scale-95 ${gameState.isPaused ? 'bg-emerald-500 text-white border-emerald-400' : 'bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500 hover:text-white'}`}>
-                  {gameState.isPaused ? 'המשך ▶️' : 'השהה ⏸️'}
-                </button>
-                <button onClick={resetToMenu} className="w-full py-3 rounded-xl font-bold bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all transform active:scale-95">חזור לתפריט 🔄</button>
-              </div>
-            )}
+        {/* Menu & History (Hidden on mobile when playing) */}
+        <aside className={`lg:col-span-1 flex-col gap-4 ${isGameActive ? 'hidden lg:flex' : 'flex'}`}>
+          <div className={`${t.card} rounded-2xl p-4 md:p-6 shadow-xl border border-white/5 flex flex-col gap-3 bg-opacity-40`}>
+            <h2 className="text-lg font-bold border-b border-white/10 pb-2 text-right">תפריט משחק</h2>
+            <button onClick={() => initializeGame(GameMode.VS_COMPUTER)} className={`w-full py-3 rounded-xl font-bold transition-all ${t.accent} ${t.accentHover} text-white transform active:scale-95`}>נגד המחשב 🤖</button>
+            <button onClick={() => initializeGame(GameMode.TWO_PLAYERS)} className={`w-full py-3 rounded-xl font-bold transition-all ${t.secondary} transform active:scale-95`}>שני שחקנים 👥</button>
           </div>
 
-          <div className={`${t.card} rounded-3xl p-5 md:p-6 shadow-xl border border-white/5 flex flex-col gap-3 flex-1 overflow-hidden bg-opacity-30`}>
-            <h2 className="text-lg font-bold border-b border-white/10 pb-2 text-right text-slate-300">היסטוריית קרבות</h2>
-            <div className="flex-1 overflow-y-auto space-y-2 pr-2 dir-rtl custom-scrollbar">
-              {gameState.history.length === 0 ? (
-                <p className="text-xs opacity-30 text-center mt-4 italic">המשחק טרם החל</p>
-              ) : (
-                gameState.history.map((round, idx) => (
-                  <div key={idx} className="bg-white/5 rounded-xl p-3 flex items-center justify-between text-xs border border-white/5 transition-all hover:bg-white/10">
-                    <div className="flex items-center gap-3">
-                       <span className={`font-bold text-lg ${round.p1Card.suit === 'Hearts' || round.p1Card.suit === 'Diamonds' ? 'text-red-400' : 'text-slate-300'}`}>
-                         {round.p1Card.rank}{SUIT_SYMBOLS[round.p1Card.suit]}
-                       </span>
-                       <span className="opacity-20 text-[10px]">נגד</span>
-                       <span className={`font-bold text-lg ${round.p2Card.suit === 'Hearts' || round.p2Card.suit === 'Diamonds' ? 'text-red-400' : 'text-slate-300'}`}>
-                         {round.p2Card.rank}{SUIT_SYMBOLS[round.p2Card.suit]}
-                       </span>
+          <div className={`${t.card} rounded-2xl p-4 md:p-6 shadow-xl border border-white/5 flex flex-col gap-3 flex-1 overflow-hidden bg-opacity-30`}>
+             <h2 className="text-sm font-bold opacity-50 text-right uppercase tracking-wider">מהלכים אחרונים</h2>
+             <div className="flex-1 overflow-y-auto space-y-2 dir-rtl custom-scrollbar pr-2">
+                {gameState.history.length === 0 ? <p className="text-xs opacity-20 text-center py-4">טרם החלו קרבות</p> : 
+                  gameState.history.map((r, i) => (
+                    <div key={i} className="bg-white/5 p-2 rounded-lg flex justify-between items-center text-[10px] md:text-xs">
+                      <span className="font-bold">{r.p1Card.rank}{SUIT_SYMBOLS[r.p1Card.suit]} vs {r.p2Card.rank}{SUIT_SYMBOLS[r.p2Card.suit]}</span>
+                      <span className={r.isWar ? 'text-red-400 font-bold' : 'opacity-40'}>{r.isWar ? 'מלחמה!' : 'סיום'}</span>
                     </div>
-                    <div className={`px-2 py-0.5 rounded-full ${round.isWar ? 'bg-red-500 text-white font-black scale-90' : 'bg-slate-700/50 opacity-50'}`}>
-                      {round.isWar ? 'מלחמה!' : 'בוצע'}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+                  ))
+                }
+             </div>
           </div>
         </aside>
 
-        {/* Board Area */}
-        <section className={`lg:col-span-3 ${t.board} rounded-[3rem] p-4 md:p-10 shadow-2xl border-4 border-slate-800/50 relative flex flex-col gap-8 items-center justify-center min-h-[500px] md:min-h-[650px] overflow-hidden bg-gradient-to-b from-transparent to-black/20`}>
-          
-          {/* Deck Counters & Status */}
-          <div className="w-full flex justify-between items-center px-4 md:px-12 absolute top-10 left-0 right-0 z-10">
-             <DeckStack count={gameState.player2Deck.length} theme={theme} label={gameState.mode === GameMode.VS_COMPUTER ? 'מחשב' : 'שחקן 2'} winnerHighlight={lastWinnerId === 2} />
-             
-             <div className="text-center bg-slate-900/60 backdrop-blur-2xl p-4 rounded-3xl border border-slate-700/50 shadow-2xl min-w-[140px] md:min-w-[220px]">
-                <p className="text-sm md:text-xl font-bold opacity-90 leading-tight">
-                  {gameState.isPaused ? 'המשחק מושהה ⏸️' : gameState.lastResult}
-                </p>
-                {gameState.status === GameStatus.WAR && !gameState.isPaused && (
-                  <div className="inline-block px-4 py-1 mt-2 rounded-full bg-red-600 text-white text-[10px] md:text-xs font-black animate-pulse uppercase tracking-widest shadow-lg shadow-red-500/40">מלחמה!</div>
-                )}
-             </div>
-
-             <DeckStack count={gameState.player1Deck.length} theme={theme} label="שחקן 1" isPlayer1 winnerHighlight={lastWinnerId === 1} />
-          </div>
-
-          {/* Table Surface */}
-          <div className={`flex-1 flex items-center justify-center gap-6 md:gap-16 w-full mt-28 transition-all duration-700 ${gameState.isPaused ? 'opacity-20 scale-95 blur-sm' : 'opacity-100 scale-100'}`}>
-            <div className="flex flex-col items-center">
-              <div className="h-44 md:h-52 flex items-center justify-center">
-                {gameState.player2InPlay.length > 0 ? (
-                   <div className="relative">
-                      <CardComponent 
-                        card={gameState.player2InPlay.slice(-1)[0]} 
-                        themeColors={t} 
-                        side="left"
-                        animationState={lastWinnerId === 2 ? 'winning' : gameState.status === GameStatus.WAR ? 'war' : 'playing'} 
-                      />
-                      {gameState.player2InPlay.length > 1 && (
-                        <div className="absolute -bottom-8 -left-4 text-xs font-black bg-blue-600 text-white px-3 py-1 rounded-full shadow-lg border-2 border-slate-900 animate-bounce">
-                          +{gameState.player2InPlay.length - 1} קלפים
-                        </div>
-                      )}
-                   </div>
-                ) : <div className="w-24 md:w-36 h-36 md:h-52 rounded-2xl border-2 border-dashed border-slate-700/50 flex items-center justify-center text-slate-800 font-black text-2xl">?</div>}
+        {/* Game Board */}
+        <section className={`lg:col-span-3 ${t.board} rounded-[2rem] md:rounded-[3rem] p-3 md:p-10 shadow-2xl border-2 md:border-4 border-slate-800/50 relative flex flex-col items-center justify-between min-h-[500px] md:min-h-[650px] overflow-hidden`}>
+           
+           {/* Top Stats */}
+           <div className="w-full flex justify-between items-center px-2 md:px-10 z-10 pt-4">
+              <DeckStack count={gameState.player2Deck.length} theme={theme} label={gameState.mode === GameMode.VS_COMPUTER ? 'מחשב' : 'שחקן 2'} winnerHighlight={lastWinnerId === 2} />
+              <div className="text-center bg-slate-900/80 backdrop-blur-md px-3 md:px-6 py-2 md:py-3 rounded-2xl border border-white/10 shadow-2xl min-w-[120px] md:min-w-[200px]">
+                 <span className="text-xs md:text-lg font-bold block">{gameState.isPaused ? 'מושהה' : gameState.lastResult}</span>
+                 {gameState.status === GameStatus.WAR && !gameState.isPaused && (
+                   <div className="inline-block px-2 py-0.5 mt-1 rounded bg-red-600 text-[10px] font-black animate-pulse">WAR!</div>
+                 )}
               </div>
-            </div>
+              <DeckStack count={gameState.player1Deck.length} theme={theme} label="שחקן 1" isPlayer1 winnerHighlight={lastWinnerId === 1} />
+           </div>
 
-            <div className="h-40 w-px bg-slate-800/50 hidden md:block" />
+           {/* Cards Table */}
+           <div className={`flex flex-1 items-center justify-center gap-4 md:gap-12 w-full transition-all duration-500 ${gameState.isPaused ? 'blur-md opacity-20' : ''}`}>
+              <div className="flex flex-col items-center gap-2">
+                 {gameState.player2InPlay.length > 0 ? (
+                   <CardComponent card={gameState.player2InPlay.slice(-1)[0]} themeColors={t} side="left" animationState={lastWinnerId === 2 ? 'winning' : gameState.status === GameStatus.WAR ? 'war' : 'playing'} />
+                 ) : <div className="w-20 md:w-32 h-32 md:h-48 rounded-xl border-2 border-dashed border-slate-700/40 flex items-center justify-center text-slate-800 text-3xl font-black">?</div>}
+              </div>
+              <div className="h-24 w-px bg-slate-800 hidden md:block opacity-20"></div>
+              <div className="flex flex-col items-center gap-2">
+                 {gameState.player1InPlay.length > 0 ? (
+                   <CardComponent card={gameState.player1InPlay.slice(-1)[0]} themeColors={t} side="right" animationState={lastWinnerId === 1 ? 'winning' : gameState.status === GameStatus.WAR ? 'war' : 'playing'} />
+                 ) : <div className="w-20 md:w-32 h-32 md:h-48 rounded-xl border-2 border-dashed border-slate-700/40 flex items-center justify-center text-slate-800 text-3xl font-black">?</div>}
+              </div>
+           </div>
 
-            <div className="flex flex-col items-center">
-              <div className="h-44 md:h-52 flex items-center justify-center">
-                {gameState.player1InPlay.length > 0 ? (
-                  <div className="relative">
-                    <CardComponent 
-                      card={gameState.player1InPlay.slice(-1)[0]} 
-                      themeColors={t} 
-                      side="right"
-                      animationState={lastWinnerId === 1 ? 'winning' : gameState.status === GameStatus.WAR ? 'war' : 'playing'} 
-                    />
-                    {gameState.player1InPlay.length > 1 && (
-                      <div className="absolute -bottom-8 -right-4 text-xs font-black bg-emerald-600 text-white px-3 py-1 rounded-full shadow-lg border-2 border-slate-900 animate-bounce">
-                        +{gameState.player1InPlay.length - 1} קלפים
-                      </div>
-                    )}
+           {/* Controls - Mobile Navigation & Play */}
+           <div className="w-full flex flex-col items-center gap-4 pb-4 md:pb-10 z-20">
+              {isGameActive && (
+                <>
+                  <button 
+                    onClick={handlePlayClick} 
+                    disabled={isProcessing || gameState.isPaused} 
+                    className="w-[85%] md:w-auto md:px-32 py-4 md:py-8 rounded-2xl md:rounded-[2rem] text-xl md:text-4xl font-black bg-emerald-500 text-white shadow-xl disabled:opacity-30 active:scale-95 transition-all border-b-4 md:border-b-8 border-emerald-700 active:border-b-0 active:translate-y-1"
+                  >
+                    {gameState.status === GameStatus.WAR ? 'המשך קרב 🔥' : 'הפוך קלף 🃏'}
+                  </button>
+                  
+                  {/* Virtual 'WASD' Controls for Mobile/Accessibility */}
+                  <div className="flex gap-2 items-center lg:hidden">
+                    <button onClick={togglePause} className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-lg">{gameState.isPaused ? '▶️' : '⏸️'}</button>
+                    <button onClick={resetToMenu} className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-lg">🔄</button>
                   </div>
-                ) : <div className="w-24 md:w-36 h-36 md:h-52 rounded-2xl border-2 border-dashed border-slate-700/50 flex items-center justify-center text-slate-800 font-black text-2xl">?</div>}
-              </div>
-            </div>
-          </div>
-          
-          {/* Master Control Button */}
-          <div className="w-full flex justify-center pb-10 z-20">
-            {isGameActive && (
-               <button 
-                onClick={handlePlayClick} 
-                disabled={isProcessing || gameState.isPaused} 
-                className={`px-12 md:px-32 py-5 md:py-8 rounded-[2.5rem] text-2xl md:text-4xl font-black bg-emerald-500 hover:bg-emerald-400 text-white shadow-[0_0_50px_rgba(16,185,129,0.3)] disabled:opacity-30 active:scale-95 transition-all w-full md:w-auto mx-4 uppercase tracking-tighter border-b-8 border-emerald-700 active:border-b-0 active:translate-y-2 select-none`}
-               >
-                  {gameState.isPaused ? 'המשחק מושהה' : gameState.status === GameStatus.WAR ? 'המשך מלחמה! 🔥' : 'הפוך קלף! 🃏'}
-                </button>
-            )}
-            
-            {gameState.status === GameStatus.FINISHED && (
-               <button onClick={() => initializeGame(gameState.mode)} className="px-16 py-6 rounded-3xl text-2xl font-black bg-white text-slate-900 shadow-2xl active:scale-95 transition-all transform hover:-translate-y-1">שחק שוב 🔄</button>
-            )}
-          </div>
+                </>
+              )}
 
-          {/* IDLE State Overlay */}
-          {gameState.status === GameStatus.IDLE && (
-            <div className="absolute inset-0 z-30 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center p-8 text-center rounded-[3rem]">
-              <div className="max-w-md animate-in fade-in zoom-in duration-500">
-                <div className="text-9xl mb-8 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] select-none">🃏</div>
-                <h3 className="text-6xl font-black mb-4 font-serif text-white tracking-tight">מלחמה</h3>
-                <p className="mb-12 text-slate-400 text-xl leading-relaxed">הגרסה המקצועית ביותר למשחק הקלפים הקלאסי. קחו את כל הקלפים כדי לנצח!</p>
-                <div className="flex flex-col gap-4">
-                  <button onClick={() => initializeGame(GameMode.VS_COMPUTER)} className="w-full py-5 rounded-2xl bg-white text-slate-950 font-black text-2xl hover:bg-emerald-400 shadow-[0_10px_40px_rgba(255,255,255,0.1)] transition-all transform hover:-translate-y-1">נגד המחשב 🤖</button>
-                  <button onClick={() => initializeGame(GameMode.TWO_PLAYERS)} className="w-full py-5 rounded-2xl border-2 border-slate-700 hover:border-emerald-500 text-slate-200 font-black text-2xl transition-all transform hover:-translate-y-1">שני שחקנים 👥</button>
+              {gameState.status === GameStatus.FINISHED && (
+                <div className="flex flex-col items-center animate-in zoom-in">
+                  <h3 className="text-3xl font-black mb-4">הזוכה: {gameState.winner}</h3>
+                  <button onClick={() => initializeGame(gameState.mode)} className="px-12 py-4 rounded-xl bg-white text-slate-900 font-black text-xl shadow-2xl active:scale-95">שחק שוב</button>
                 </div>
-                <p className="mt-10 text-xs opacity-40 font-bold uppercase tracking-widest">WASD / SPACE / ENTER - קיצורי מקלדת</p>
+              )}
+           </div>
+
+           {/* Landing Screen */}
+           {gameState.status === GameStatus.IDLE && (
+              <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-3xl z-40 flex flex-col items-center justify-center p-6 text-center">
+                 <div className="text-8xl mb-6">🃏</div>
+                 <h2 className="text-5xl md:text-7xl font-black mb-4 font-serif">מלחמה</h2>
+                 <p className="text-slate-400 max-w-sm mb-10">המשחק הקלאסי בגרסה מלוטשת. הפכו קלפים וקחו את כל הקופה!</p>
+                 <div className="grid grid-cols-1 gap-4 w-full max-w-xs">
+                    <button onClick={() => initializeGame(GameMode.VS_COMPUTER)} className="py-4 bg-white text-slate-950 rounded-xl font-black text-xl hover:bg-emerald-400 transition-all active:scale-95">נגד המחשב 🤖</button>
+                    <button onClick={() => initializeGame(GameMode.TWO_PLAYERS)} className="py-4 border-2 border-slate-700 text-white rounded-xl font-black text-xl active:scale-95">שני שחקנים 👥</button>
+                 </div>
+                 <div className="mt-12 text-[10px] opacity-30 font-bold uppercase tracking-[0.2em]">WASD / SPACE / ENTER TO PLAY</div>
               </div>
-            </div>
-          )}
+           )}
         </section>
       </main>
 
       {/* Production Footer */}
-      <footer className="mt-8 max-w-6xl mx-auto w-full text-center border-t border-slate-800/50 pt-8 pb-4 opacity-40 text-[10px] md:text-xs">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <p dir="ltr" className="font-mono tracking-tighter">(C) Noam Gold AI 2026</p>
-          <div className="flex gap-6 items-center">
-            <a href="mailto:goldnoamai@gmail.com" className="hover:text-white transition-colors underline decoration-slate-600">שלח משוב</a>
-            <span className="font-mono">goldnoamai@gmail.com</span>
+      <footer className="mt-4 md:mt-8 max-w-6xl mx-auto w-full text-center border-t border-slate-800/50 pt-4 md:pt-8 pb-4 opacity-40 text-[9px] md:text-xs">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-2">
+          <p dir="ltr">(C) Noam Gold AI 2026</p>
+          <div className="flex gap-4">
+            <a href="mailto:goldnoamai@gmail.com" className="hover:text-white underline">משוב</a>
+            <span dir="ltr">goldnoamai@gmail.com</span>
           </div>
         </div>
       </footer>
       
       <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
         .dir-rtl { direction: rtl; }
+        .select-none { user-select: none; -webkit-user-select: none; }
       `}</style>
     </div>
   );
