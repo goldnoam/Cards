@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Suit } from '../types';
-import { SUIT_SYMBOLS } from '../constants';
+import { Card, Suit } from '../types.ts';
+import { SUIT_SYMBOLS } from '../constants.tsx';
 
 interface CardComponentProps {
   card?: Card;

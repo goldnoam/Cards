@@ -1,8 +1,7 @@
-
 import React from 'react';
-import { Theme } from '../types';
-import { THEME_CONFIG } from '../constants';
-import CardComponent from './CardComponent';
+import { Theme } from '../types.ts';
+import { THEME_CONFIG } from '../constants.tsx';
+import CardComponent from './CardComponent.tsx';
 
 interface DeckStackProps {
   count: number;

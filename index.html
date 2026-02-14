@@ -17,10 +17,31 @@
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🃏</text></svg>">
     
-    <!-- Google AdSense Placeholder (Ready for integration) -->
-    <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+    <!-- Linked Styles -->
+    <link rel="stylesheet" href="./index.css">
 
+    <!-- Tailwind CDN with Configuration -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            animation: {
+              'card-flip': 'flip 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards',
+              'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            },
+            keyframes: {
+              flip: {
+                '0%': { transform: 'rotateY(90deg) scale(0.9)', opacity: '0' },
+                '100%': { transform: 'rotateY(0deg) scale(1)', opacity: '1' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -31,9 +52,11 @@
     <script type="importmap">
     {
       "imports": {
-        "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+        "react": "https://esm.sh/react@^19.2.4",
         "react/": "https://esm.sh/react@^19.2.4/",
-        "react": "https://esm.sh/react@^19.2.4"
+        "react-dom": "https://esm.sh/react-dom@^19.2.4",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+        "lucide-react": "https://esm.sh/lucide-react@latest"
       }
     }
     </script>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, GameMode, GameStatus, Theme, GameState, RoundHistory } from './types';
-import { SUITS, RANKS, RANK_VALUES, THEME_CONFIG, SUIT_SYMBOLS } from './constants';
-import CardComponent from './components/CardComponent';
-import DeckStack from './components/DeckStack';
-import { sounds } from './services/soundService';
+import { Card, GameMode, GameStatus, Theme, GameState, RoundHistory } from './types.ts';
+import { SUITS, RANKS, RANK_VALUES, THEME_CONFIG, SUIT_SYMBOLS } from './constants.tsx';
+import CardComponent from './components/CardComponent.tsx';
+import DeckStack from './components/DeckStack.tsx';
+import { sounds } from './services/soundService.ts';
 
 const createDeck = (): Card[] => {
   const deck: Card[] = [];
