@@ -158,6 +158,25 @@ const App: React.FC = () => {
     }
   };
 
+  const handleSkipWar = () => {
+    if (gameState.status !== GameStatus.WAR || isProcessing || gameState.isPaused) return;
+    
+    // Concede all cards currently in play to the opponent (P2 / Computer)
+    const cardsInPlay = [...gameState.player1InPlay, ...gameState.player2InPlay];
+    
+    setGameState(prev => ({
+      ...prev,
+      player2Deck: [...prev.player2Deck, ...shuffle(cardsInPlay)],
+      player1InPlay: [],
+      player2InPlay: [],
+      status: GameStatus.PLAYING,
+      lastResult: 'ויתרת על המלחמה! היריב זכה בקלפים',
+    }));
+    
+    setLastWinnerId(null);
+    if (!gameState.isMuted) sounds.lose();
+  };
+
   const resetToMenu = () => {
     setGameState(prev => ({
       ...prev,
@@ -211,6 +230,7 @@ const App: React.FC = () => {
       }
       if (key === 'p') togglePause();
       if (key === 'r') resetToMenu();
+      if (key === 'x' && gameState.status === GameStatus.WAR) handleSkipWar();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -298,7 +318,7 @@ const App: React.FC = () => {
            {/* Controls - Mobile Navigation & Play */}
            <div className="w-full flex flex-col items-center gap-4 pb-4 md:pb-10 z-20">
               {isGameActive && (
-                <>
+                <div className="flex flex-col items-center gap-3 w-full">
                   <button 
                     onClick={handlePlayClick} 
                     disabled={isProcessing || gameState.isPaused} 
@@ -307,12 +327,21 @@ const App: React.FC = () => {
                     {gameState.status === GameStatus.WAR ? 'המשך קרב 🔥' : 'הפוך קלף 🃏'}
                   </button>
                   
+                  {gameState.status === GameStatus.WAR && !isProcessing && !gameState.isPaused && (
+                    <button 
+                      onClick={handleSkipWar}
+                      className="w-[60%] md:w-auto md:px-16 py-3 rounded-xl bg-amber-600/20 text-amber-500 border border-amber-600/40 font-bold hover:bg-amber-600 hover:text-white transition-all active:scale-95"
+                    >
+                      דלג על המלחמה (ויתור) 🏳️
+                    </button>
+                  )}
+
                   {/* Virtual 'WASD' Controls for Mobile/Accessibility */}
                   <div className="flex gap-2 items-center lg:hidden">
                     <button onClick={togglePause} className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-lg">{gameState.isPaused ? '▶️' : '⏸️'}</button>
                     <button onClick={resetToMenu} className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-lg">🔄</button>
                   </div>
-                </>
+                </div>
               )}
 
               {gameState.status === GameStatus.FINISHED && (
