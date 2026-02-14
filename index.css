@@ -1,25 +1,18 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  body {
-    @apply bg-slate-50 text-slate-900 transition-colors duration-300;
-  }
-  .dark body {
-    @apply bg-[#020617] text-slate-100;
-  }
+/* Standard CSS for Production */
+body {
+  margin: 0;
+  font-family: 'Assistant', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@layer components {
-  .perspective-1000 {
-    perspective: 1000px;
-  }
-  
-  .card-reveal {
-    backface-visibility: hidden;
-    transform-style: preserve-3d;
-  }
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.card-reveal {
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
 }
 
 /* Custom Scrollbar */
@@ -27,16 +20,17 @@
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-400/20 rounded-full;
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 9999px;
 }
 .dark ::-webkit-scrollbar-thumb {
-  @apply bg-slate-700/50;
+  background: rgba(51, 65, 85, 0.5);
 }
 
-/* Dealing Animations (Arcing + Flipping) */
+/* Dealing Animations */
 @keyframes deal-left {
   0% {
     transform: translate(-200px, -300px) rotateY(90deg) rotateZ(-40deg) scale(0.4);
