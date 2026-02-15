@@ -137,7 +137,7 @@ const App: React.FC = () => {
       player2InPlay: nextInPlayP2,
       lastResult: resultMsg,
       status: newStatus,
-      history: [roundRecord, ...prev.history].slice(0, 8)
+      history: [roundRecord, ...prev.history].slice(0, 30) // Increased capacity
     }));
 
     setTimeout(() => setIsProcessing(false), isCurrentWar ? 1600 : 600);
@@ -171,6 +171,12 @@ const App: React.FC = () => {
       player2InPlay: [],
       status: GameStatus.PLAYING,
       lastResult: 'ויתרת על המלחמה! היריב זכה בקלפים',
+      history: [{
+        p1Card: prev.player1InPlay[prev.player1InPlay.length - 1],
+        p2Card: prev.player2InPlay[prev.player2InPlay.length - 1],
+        result: 'ויתור במלחמה 🏳️',
+        isWar: true
+      }, ...prev.history].slice(0, 30)
     }));
     
     setLastWinnerId(null);
@@ -185,7 +191,8 @@ const App: React.FC = () => {
       player2Deck: [],
       player1InPlay: [],
       player2InPlay: [],
-      isPaused: false
+      isPaused: false,
+      history: []
     }));
     setLastWinnerId(null);
   };
@@ -262,24 +269,49 @@ const App: React.FC = () => {
       {/* Main Container */}
       <main className="flex-1 max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-4 gap-4 overflow-hidden relative">
         
-        {/* Menu & History (Hidden on mobile when playing) */}
+        {/* Menu & History */}
         <aside className={`lg:col-span-1 flex-col gap-4 ${isGameActive ? 'hidden lg:flex' : 'flex'}`}>
           <div className={`${t.card} rounded-2xl p-4 md:p-6 shadow-xl border border-white/5 flex flex-col gap-3 bg-opacity-40`}>
             <h2 className="text-lg font-bold border-b border-white/10 pb-2 text-right">תפריט משחק</h2>
             <button onClick={() => initializeGame(GameMode.VS_COMPUTER)} className={`w-full py-3 rounded-xl font-bold transition-all ${t.accent} ${t.accentHover} text-white transform active:scale-95`}>נגד המחשב 🤖</button>
             <button onClick={() => initializeGame(GameMode.TWO_PLAYERS)} className={`w-full py-3 rounded-xl font-bold transition-all ${t.secondary} transform active:scale-95`}>שני שחקנים 👥</button>
+            {isGameActive && (
+              <button onClick={resetToMenu} className="w-full py-2 rounded-xl text-sm font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all border border-red-500/20">סיים משחק 🏳️</button>
+            )}
           </div>
 
           <div className={`${t.card} rounded-2xl p-4 md:p-6 shadow-xl border border-white/5 flex flex-col gap-3 flex-1 overflow-hidden bg-opacity-30`}>
-             <h2 className="text-sm font-bold opacity-50 text-right uppercase tracking-wider">מהלכים אחרונים</h2>
-             <div className="flex-1 overflow-y-auto space-y-2 dir-rtl custom-scrollbar pr-2">
+             <h2 className="text-sm font-bold opacity-50 text-right uppercase tracking-wider">היסטוריית קרבות</h2>
+             <div className="flex-1 overflow-y-auto space-y-2 dir-rtl custom-scrollbar pl-2 ml-[-8px]">
                 {gameState.history.length === 0 ? <p className="text-xs opacity-20 text-center py-4">טרם החלו קרבות</p> : 
-                  gameState.history.map((r, i) => (
-                    <div key={i} className="bg-white/5 p-2 rounded-lg flex justify-between items-center text-[10px] md:text-xs">
-                      <span className="font-bold">{r.p1Card.rank}{SUIT_SYMBOLS[r.p1Card.suit]} vs {r.p2Card.rank}{SUIT_SYMBOLS[r.p2Card.suit]}</span>
-                      <span className={r.isWar ? 'text-red-400 font-bold' : 'opacity-40'}>{r.isWar ? 'מלחמה!' : 'סיום'}</span>
-                    </div>
-                  ))
+                  gameState.history.map((r, i) => {
+                    const isP1Winner = r.p1Card.value > r.p2Card.value;
+                    const isP2Winner = r.p2Card.value > r.p1Card.value;
+                    const isRed1 = r.p1Card.suit === 'Hearts' || r.p1Card.suit === 'Diamonds';
+                    const isRed2 = r.p2Card.suit === 'Hearts' || r.p2Card.suit === 'Diamonds';
+                    
+                    return (
+                      <div key={i} className={`bg-white/5 p-3 rounded-xl flex flex-col gap-2 border-r-4 ${r.isWar ? 'border-amber-500' : isP1Winner ? 'border-blue-500' : isP2Winner ? 'border-red-500' : 'border-slate-500'} animate-in slide-in-from-right-4 duration-300`}>
+                        <div className="flex justify-between items-center text-[10px] md:text-xs">
+                           <div className={`flex items-center gap-1 ${isP1Winner ? 'font-black scale-105 text-blue-400' : 'opacity-60'}`}>
+                             <span>שחקן 1</span>
+                             <span className={isRed1 ? 'text-red-400' : 'text-slate-300'}>{r.p1Card.rank}{SUIT_SYMBOLS[r.p1Card.suit]}</span>
+                           </div>
+                           <span className="opacity-20 mx-1">VS</span>
+                           <div className={`flex items-center gap-1 ${isP2Winner ? 'font-black scale-105 text-red-400' : 'opacity-60'}`}>
+                             <span className={isRed2 ? 'text-red-400' : 'text-slate-300'}>{r.p2Card.rank}{SUIT_SYMBOLS[r.p2Card.suit]}</span>
+                             <span>{gameState.mode === GameMode.VS_COMPUTER ? 'מחשב' : 'שחקן 2'}</span>
+                           </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${r.isWar ? 'bg-amber-500/20 text-amber-500' : 'bg-slate-500/10 text-slate-400'}`}>
+                            {r.isWar ? 'מלחמה!' : 'קרב רגיל'}
+                          </span>
+                          <span className="text-[10px] opacity-60 font-medium">{r.result}</span>
+                        </div>
+                      </div>
+                    );
+                  })
                 }
              </div>
           </div>
@@ -294,7 +326,7 @@ const App: React.FC = () => {
               <div className="text-center bg-slate-900/80 backdrop-blur-md px-3 md:px-6 py-2 md:py-3 rounded-2xl border border-white/10 shadow-2xl min-w-[120px] md:min-w-[200px]">
                  <span className="text-xs md:text-lg font-bold block">{gameState.isPaused ? 'מושהה' : gameState.lastResult}</span>
                  {gameState.status === GameStatus.WAR && !gameState.isPaused && (
-                   <div className="inline-block px-2 py-0.5 mt-1 rounded bg-red-600 text-[10px] font-black animate-pulse">WAR!</div>
+                   <div className="inline-block px-2 py-0.5 mt-1 rounded bg-red-600 text-[10px] font-black animate-pulse uppercase tracking-widest">WAR!</div>
                  )}
               </div>
               <DeckStack count={gameState.player1Deck.length} theme={theme} label="שחקן 1" isPlayer1 winnerHighlight={lastWinnerId === 1} />
@@ -315,7 +347,7 @@ const App: React.FC = () => {
               </div>
            </div>
 
-           {/* Controls - Mobile Navigation & Play */}
+           {/* Controls */}
            <div className="w-full flex flex-col items-center gap-4 pb-4 md:pb-10 z-20">
               {isGameActive && (
                 <div className="flex flex-col items-center gap-3 w-full">
@@ -336,7 +368,6 @@ const App: React.FC = () => {
                     </button>
                   )}
 
-                  {/* Virtual 'WASD' Controls for Mobile/Accessibility */}
                   <div className="flex gap-2 items-center lg:hidden">
                     <button onClick={togglePause} className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-lg">{gameState.isPaused ? '▶️' : '⏸️'}</button>
                     <button onClick={resetToMenu} className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-lg">🔄</button>
@@ -368,7 +399,7 @@ const App: React.FC = () => {
         </section>
       </main>
 
-      {/* Production Footer */}
+      {/* Footer */}
       <footer className="mt-4 md:mt-8 max-w-6xl mx-auto w-full text-center border-t border-slate-800/50 pt-4 md:pt-8 pb-4 opacity-40 text-[9px] md:text-xs">
         <div className="flex flex-col md:flex-row justify-between items-center gap-2">
           <p dir="ltr">(C) Noam Gold AI 2026</p>
@@ -380,8 +411,9 @@ const App: React.FC = () => {
       </footer>
       
       <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
         .dir-rtl { direction: rtl; }
         .select-none { user-select: none; -webkit-user-select: none; }
       `}</style>
